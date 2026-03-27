@@ -1,78 +1,103 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "eks-java-cicd.fullname" . }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "eks-java-cicd.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}
+    app-version: {{ .Values.image_tag }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  strategy:
+    type: {{ .Values.strategy_type }}
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy_maxsurge }}
+      maxUnavailable: {{ .Values.strategy_maxunavailable }}
+  progressDeadlineSeconds: 600
+  minReadySeconds: 15
   selector:
     matchLabels:
-      {{- include "eks-java-cicd.selectorLabels" . | nindent 6 }}
+      app: {{ .Release.Name }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        checksum/values: {{ toYaml .Values | sha256sum }}
       labels:
-        {{- include "eks-java-cicd.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: {{ .Release.Name }}
+        version: {{ .Chart.Version }}
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Values.image_tag }}
+        generator: helm
+        date: {{ now | htmlDate }}
+        chart: {{ .Chart.Name }}
+      annotations:
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "eks-java-cicd.serviceAccountName" . }}
-      {{- with .Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      containers:
-        - name: {{ .Chart.Name }}
-          {{- with .Values.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
+      terminationGracePeriodSeconds: {{ .Values.terminationgraceperiodseconds }}
       affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sleep
+                  - "{{ .Values.lifecycle_preStop_second }}"
+          resources:
+            limits:
+              cpu: {{ .Values.resources_limits_cpu }}
+              memory: {{ .Values.resources_limits_mem }}
+            requests:
+              cpu: {{ .Values.resources_requests_cpu }}
+              memory: {{ .Values.resources_requests_mem }}
+          env:
+            - name: TZ
+              value: Asia/Taipei
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: {{ .Values.service_port }}
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.liveness_endpoint }}
+              port: {{ .Values.service_port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.liveness_initial_delay_second }}
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.readiness_endpoint }}
+              port: {{ .Values.service_port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.readiness_initial_delay_second }}
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+---

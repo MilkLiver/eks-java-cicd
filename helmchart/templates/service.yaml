@@ -1,15 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "eks-java-cicd.fullname" . }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "eks-java-cicd.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    version: {{ .Chart.Version }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+    - name: http-{{ .Values.service_port }}
+      port: {{ .Values.service_port }}
+      targetPort: {{ .Values.target_port }}
   selector:
-    {{- include "eks-java-cicd.selectorLabels" . | nindent 4 }}
+    app: {{ .Release.Name }}
+---
