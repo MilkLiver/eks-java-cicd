@@ -2,42 +2,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "eks-java-cicd.fullname" . }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "eks-java-cicd.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    app: {{ .Release.Name }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
 spec:
   {{- with .Values.ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
+    - http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
+          - path: {{ .Values.ingress.path }}
+            {{- with .Values.ingress.pathType }}
             pathType: {{ . }}
             {{- end }}
             backend:
               service:
-                name: {{ include "eks-java-cicd.fullname" $ }}
+                name: {{ .Release.Name }}
                 port:
-                  number: {{ $.Values.service.port }}
-          {{- end }}
-    {{- end }}
+                  number: {{ .Values.service_port }}
 {{- end }}

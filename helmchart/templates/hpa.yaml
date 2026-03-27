@@ -1,15 +1,23 @@
 {{- if .Values.autoscaling.enabled }}
+#apiVersion: autoscaling/v2beta2
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "eks-java-cicd.fullname" . }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "eks-java-cicd.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.image_tag }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "eks-java-cicd.fullname" . }}
+    name: {{ .Release.Name }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
