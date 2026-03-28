@@ -1,0 +1,38 @@
+replicaCount: 2
+
+image:
+  repository: "docker.io/milkliver/eks-java-cicd"
+  tag: "0.0.1"
+  pullPolicy: Always
+
+service_port: 8080
+target_port: 8080
+
+lifecycle_preStop_second: 5
+strategy_type: RollingUpdate
+strategy_maxsurge: 1
+strategy_maxunavailable: 0
+terminationgraceperiodseconds: 30
+
+resources_limits_cpu: 250m
+resources_requests_cpu: 100m
+resources_limits_mem: 250mi
+resources_requests_mem: 100mi
+
+liveness_endpoint: /actuator/health/liveness
+readiness_endpoint: /actuator/health/readiness
+liveness_initial_delay_second: 5
+readiness_initial_delay_second: 5
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  # targetCPUUtilizationPercentage: ${CPU_PERCENT}
+  targetMemoryUtilizationPercentage: 80
+
+ingress:
+  enabled: true
+  className: alb
+  path: /
+  pathType: Prefix

@@ -1,0 +1,40 @@
+version: "${IMAGE_TAG}"
+
+replicaCount: ${REPLICAS}
+
+image:
+  repository: "${IMAGE_REPO}"
+  tag: "${IMAGE_TAG}"
+  pullPolicy: Always
+
+service_port: ${SERVICE_PORT}
+target_port: ${TARGET_PORT}
+
+resources_limits_cpu: ${LIMIT_CPU}
+resources_requests_cpu: ${REQUEST_CPU}
+resources_limits_mem: ${LIMIT_MEM}
+resources_requests_mem: ${REQUEST_MEM}
+
+lifecycle_preStop_second: ${PRESTOP_SLEEP_SECOND}
+strategy_type: ${STRATEGY_TYPE}
+strategy_maxsurge: ${STRATEGY_MAXSURGE}
+strategy_maxunavailable: ${STRATEGY_MAXUNAVAILABLE}
+terminationgraceperiodseconds: ${TERMINATION_GRACE_PERIOD_SECOND}
+
+liveness_endpoint: ${LIVENESS_ENDPOINT}
+readiness_endpoint: ${READINESS_ENDPOINT}
+liveness_initial_delay_second: ${INITIAL_DELAY_SECOND}
+readiness_initial_delay_second: ${INITIAL_DELAY_SECOND}
+
+autoscaling:
+  enabled: ${ENABLE_HPA}
+  minReplicas: ${REPLICA_MIN}
+  maxReplicas: ${REPLICA_MAX}
+  # targetCPUUtilizationPercentage: ${CPU_PERCENT}
+  targetMemoryUtilizationPercentage: ${MEM_PERCENT}
+
+ingress:
+  enabled: ${ENABLE_INGRESS}
+  className: ${INGRESS_CLASS_NAME}
+  path: ${INGRESS_PATH}
+  pathType: ${INGRESS_PATH_TYPE}

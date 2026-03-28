@@ -1,0 +1,16 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}

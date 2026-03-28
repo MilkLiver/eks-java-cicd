@@ -1,0 +1,29 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            {{- with .Values.ingress.pathType }}
+            pathType: {{ . }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: {{ .Values.service_port }}
+{{- end }}

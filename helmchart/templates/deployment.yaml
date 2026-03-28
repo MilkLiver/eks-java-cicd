@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    app-version: {{ .Values.image_tag }}
+    generator: helm
+    date: {{ now | htmlDate }}
+    chart: {{ .Chart.Name }}
+    chartversion: {{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.strategy_type }}
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy_maxsurge }}
+      maxUnavailable: {{ .Values.strategy_maxunavailable }}
+  progressDeadlineSeconds: 600
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/values: {{ toYaml .Values | sha256sum }}
+      labels:
+        app: {{ .Release.Name }}
+        version: {{ .Chart.Version }}
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Values.image.tag }}
+        generator: helm
+        date: {{ now | htmlDate }}
+        chart: {{ .Chart.Name }}
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationgraceperiodseconds }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sleep
+                  - "{{ .Values.lifecycle_preStop_second }}"
+          resources:
+            limits:
+              cpu: {{ .Values.resources_limits_cpu }}
+              memory: {{ .Values.resources_limits_mem }}
+            requests:
+              cpu: {{ .Values.resources_requests_cpu }}
+              memory: {{ .Values.resources_requests_mem }}
+          env:
+            - name: TZ
+              value: Asia/Taipei
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: {{ .Values.service_port }}
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.liveness_endpoint }}
+              port: {{ .Values.service_port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.liveness_initial_delay_second }}
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.readiness_endpoint }}
+              port: {{ .Values.service_port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.readiness_initial_delay_second }}
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+---
