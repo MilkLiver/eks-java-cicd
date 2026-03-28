@@ -36,3 +36,5 @@ ingress:
   className: alb
   path: /
   pathType: Prefix
+  scheme: internet-facing
+  targetType: ip

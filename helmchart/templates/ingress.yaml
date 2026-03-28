@@ -10,6 +10,8 @@ metadata:
     date: {{ now | htmlDate }}
     chart: {{ .Chart.Name }}
     chartversion: {{ .Chart.Version }}
+    alb.ingress.kubernetes.io/scheme: {{ .Values.ingress.scheme }}
+    alb.ingress.kubernetes.io/target-type: {{ .Values.ingress.targetType }}
 spec:
   {{- with .Values.ingress.className }}
   ingressClassName: {{ . }}

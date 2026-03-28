@@ -38,3 +38,5 @@ ingress:
   className: ${INGRESS_CLASS_NAME}
   path: ${INGRESS_PATH}
   pathType: ${INGRESS_PATH_TYPE}
+  scheme: ${INGRESS_SCHEME}
+  targetType: ${INGRESS_TARGET_TYPE}
