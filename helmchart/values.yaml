@@ -6,7 +6,7 @@ image:
   pullPolicy: Always
 
 service_port: 8080
-target_port: 80
+target_port: 8080
 
 lifecycle_preStop_second: 5
 strategy_type: RollingUpdate
