@@ -1,0 +1,1 @@
+helm -n eks-java-demo install java-demo -f ./helmchart/values.yaml ./helmchart/
