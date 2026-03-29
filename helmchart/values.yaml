@@ -31,6 +31,9 @@ autoscaling:
   # targetCPUUtilizationPercentage: ${CPU_PERCENT}
   targetMemoryUtilizationPercentage: 80
 
+pdb:
+  maxUnavailable: 10%
+
 ingress:
   enabled: true
   className: alb
