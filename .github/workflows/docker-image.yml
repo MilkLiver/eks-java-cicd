@@ -104,6 +104,7 @@ jobs:
         - uses: actions/checkout@v4
         - name: Run deploy image
           run: |
+            sed -i "s/\${APP_VERSION}/${IMAGE_TAG}/g" ./helmchart/Chart.yaml && \
             terraform init && \
             terraform import -var="IMAGE_TAG=${IMAGE_TAG}" helm_release.eks-java-demo eks-java-demo/java-demo && \
             terraform apply -var="IMAGE_TAG=${IMAGE_TAG}" -auto-approve
