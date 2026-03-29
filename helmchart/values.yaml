@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: "docker.io/milkliver/eks-java-cicd"
-  tag: "0.0.1"
+  tag: "1.1.0"
   pullPolicy: Always
 
 service_port: 8080
