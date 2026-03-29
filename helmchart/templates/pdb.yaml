@@ -10,7 +10,7 @@ metadata:
     chart: {{ .Chart.Name }}
     chartversion: {{ .Chart.Version }}
 spec:
-  maxUnavailable: 1
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}

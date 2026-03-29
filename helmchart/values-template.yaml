@@ -33,6 +33,9 @@ autoscaling:
   # targetCPUUtilizationPercentage: ${CPU_PERCENT}
   targetMemoryUtilizationPercentage: ${MEM_PERCENT}
 
+pdb:
+  maxUnavailable: ${PDB_MAX_UNAVAILABLE}
+
 ingress:
   enabled: ${ENABLE_INGRESS}
   className: ${INGRESS_CLASS_NAME}
