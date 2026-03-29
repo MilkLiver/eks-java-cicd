@@ -94,7 +94,22 @@ jobs:
           no-cache: true
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
-
+  tag-release:
+      if: startsWith(github.ref, 'refs/tags/')
+      needs: build-image
+      runs-on: [aws, eks] # 這裡指定你的 EKS Bastion Runner
+      env:
+        IMAGE_TAG: ${{ github.ref_name }}
+      steps:
+        - uses: actions/checkout@v4
+        - name: Run Special Task
+          run: |
+            ls -lR
+            helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
+            -f ./helmchart/values.yaml \
+            --set image.tag=${IMAGE_TAG} \
+            ./helmchart/
+            # 執行你指定的指令，例如部署到 EKS
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
