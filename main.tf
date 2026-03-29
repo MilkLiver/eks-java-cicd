@@ -15,8 +15,8 @@ provider "helm" {
 
 
 resource "helm_release" "eks-java-demo" {
-  name      = "eks-java-demo"
-  namespace = "eks-java-cicd"
+  name      = "java-demo"
+  namespace = "eks-java-demo"
 
   # 1. 指定本機路徑 (相對於 terraform 執行路徑)
   chart   = "./helmchart"
