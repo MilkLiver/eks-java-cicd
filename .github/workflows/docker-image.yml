@@ -107,6 +107,7 @@ jobs:
             helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
             -f ./helmchart/values.yaml \
             --server-side=auto \
+            --force-conflicts \
             --set image.tag=${IMAGE_TAG} \
             ./helmchart/
             # 執行你指定的指令，例如部署到 EKS
