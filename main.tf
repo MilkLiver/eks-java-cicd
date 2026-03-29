@@ -22,6 +22,7 @@ resource "helm_release" "eks-java-demo" {
   chart   = "./helmchart"
   timeout = 300
   wait    = true
+  force_update = true
 
   values = [
     file("${path.module}/helmchart/values.yaml")
