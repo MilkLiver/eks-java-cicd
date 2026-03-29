@@ -106,7 +106,7 @@ jobs:
           run: |
             terraform init && \
             terraform import helm_release.eks-java-demo eks-java-demo/java-demo && \
-            IMAGE_TAG=$IMAGE_TAG terraform apply -auto-approve
+            TF_VAR_IMAGE_TAG=$IMAGE_TAG terraform apply -auto-approve
             # helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
             # -f ./helmchart/values.yaml \
             # --server-side=auto \
