@@ -99,14 +99,14 @@ jobs:
       needs: build-image
       runs-on: [aws, eks] # 這裡指定你的 EKS Bastion Runner
       env:
-        TF_VAR_IMAGE_TAG: ${{ github.ref_name }}
+        IMAGE_TAG: ${{ github.ref_name }}
       steps:
         - uses: actions/checkout@v4
         - name: Run deploy image
           run: |
             terraform init && \
-            terraform import helm_release.eks-java-demo eks-java-demo/java-demo && \
-            terraform apply -auto-approve
+            terraform import -var="IMAGE_TAG=${IMAGE_TAG}" helm_release.eks-java-demo eks-java-demo/java-demo && \
+            terraform apply -var="IMAGE_TAG=${IMAGE_TAG}" -auto-approve
             # helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
             # -f ./helmchart/values.yaml \
             # --server-side=auto \
