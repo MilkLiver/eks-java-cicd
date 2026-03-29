@@ -102,14 +102,15 @@ jobs:
         IMAGE_TAG: ${{ github.ref_name }}
       steps:
         - uses: actions/checkout@v4
-        - name: Run Special Task
+        - name: Run deploy image
           run: |
-            helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
-            -f ./helmchart/values.yaml \
-            --server-side=auto \
-            --force-conflicts \
-            --set image.tag=${IMAGE_TAG} \
-            ./helmchart/
+            terraform apply -auto-approve -var="IMAGE_TAG=$IMAGE_TAG"
+            # helm -n eks-java-demo upgrade --install --wait --timeout 300s java-demo \
+            # -f ./helmchart/values.yaml \
+            # --server-side=auto \
+            # --force-conflicts \
+            # --set image.tag=${IMAGE_TAG} \
+            # ./helmchart/
             # 執行你指定的指令，例如部署到 EKS
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
