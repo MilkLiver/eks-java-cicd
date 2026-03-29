@@ -34,7 +34,7 @@ autoscaling:
   targetMemoryUtilizationPercentage: ${MEM_PERCENT}
 
 pdb:
-  maxUnavailable: ${PDB_MAX_UNAVAILABLE}
+  minAvailable: ${PDB_MIN_AVAILABLE}
 
 ingress:
   enabled: ${ENABLE_INGRESS}
