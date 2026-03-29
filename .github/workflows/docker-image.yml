@@ -70,7 +70,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.PUSH_IMAGE_REGISTRY }}/${{ env.CATALOG_IMAGE_NAME }}
+          images: ${{ env.PUSH_IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=ref,event=branch
