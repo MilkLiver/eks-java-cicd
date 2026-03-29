@@ -32,7 +32,7 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
 
 pdb:
-  maxUnavailable: 10%
+  minAvailable: 10%
 
 ingress:
   enabled: true
